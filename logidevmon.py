@@ -151,7 +151,7 @@ async def _read_events(callback):
         async for message in websocket:
             keepReading = callback(message)
             if not keepReading:
-                return    
+                return
 
 def read_events(callback):
     asyncio.get_event_loop().run_until_complete(_read_events(callback))
