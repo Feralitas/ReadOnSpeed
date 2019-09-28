@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.clock import Clock
@@ -16,6 +19,16 @@ from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
 from kivy.uix.image import Image
 from kivy.uix.anchorlayout import AnchorLayout
 import random
+from kivy.config import Config
+import win32com.client
+Config.set('graphics', 'fullscreen', 'fake')
+Config.set('graphics', 'position', 'custom')
+Config.set('graphics', 'top', '300')
+Config.set('graphics', 'left', '300')
+
+from main_spritz import fastReader
+import sys
+import fileinput
 
 
 class MyBackground(Widget):
@@ -44,6 +57,14 @@ class TDE(Widget):  # Text display engine
         self.bind(size=self._update_rect, pos=self._update_rect)
         self.i = 0
 
+        article = ""
+        for line in fileinput.input(sys.argv[2:]):
+            article += line #to_unicode
+        self.reader = fastReader()
+        self.reader.prepareNewText(article)
+        self.reader.setWheelSpeed(1000)
+        self.nextValidCall = 0
+
     def _update_rect(self):
         self.rect.size = self.parent.size
         self.outTxt.pos = self.parent.center
@@ -56,9 +77,11 @@ class TDE(Widget):  # Text display engine
 
     def callbackWriteText(self, label):
         self.i=self.i+1
-        self.outTxt.text = '[size=32][color=ff3333]Hello[/color] [color=3333ff]World[/color][/size][size=62]' + str(self.i) + '[/size]'  #datetime.datetime.now()
+        if self.i > self.nextValidCall:
+            (word, durationInSec) = self.reader.getNextWord()
+            self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+word+'[/font][/color][/size]'  #datetime.datetime.now()
+            self.nextValidCall=self.i+durationInSec*1000
         self.setToMiddle()
-
 
 
 class ReadOnSpeedApp(App):
@@ -75,7 +98,13 @@ class ReadOnSpeedApp(App):
         win32gui.SetWindowLong(handle, win32con.GWL_EXSTYLE, win32gui.GetWindowLong(handle, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
         # make it transparent (alpha between 0 and 255)
         win32gui.SetLayeredWindowAttributes(handle, win32api.RGB(0, 0, 0), alpha, win32con.LWA_ALPHA)
-        
+    
+    def makeItForeground(self):
+        handle = win32gui.FindWindow(None, "ReadOnSpeedApp")
+        shell = win32com.client.Dispatch("WScript.Shell")
+        shell.SendKeys('%')
+        win32gui.SetForegroundWindow(handle)
+
     def build(self):
         ##Experiment
         parent = MyBackground()
@@ -94,6 +123,7 @@ class ReadOnSpeedApp(App):
         Clock.schedule_interval(lambda dt: self.callbackWriteText(label), 0.001)
         Clock.schedule_once(lambda dt: self.makeItTransparent(alpha=0.0), 0.1)
         Clock.schedule_once(lambda dt: self.textGen.setToMiddle(), 0.2)
+        # Clock.schedule_interval(lambda dt: self.makeItForeground(),2)
         # Get the window
         return parent
 
