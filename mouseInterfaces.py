@@ -9,10 +9,10 @@ import threading
 import asyncio
 from kivy.logger import Logger
 
-
 time_message = time.time_ns()
 velocity = 0
 mouse_event_listener_thread_handle = None
+server_process = None
 
 def get_time_and_velocity():
     global time_message, velocity
@@ -41,6 +41,7 @@ def init_event_loop():
     asyncio.set_event_loop(loop)
 
 def mouse_event_listener_thread():
+    global server_process
     Logger.info("logidev: starting logi-devmon.exe")
     server_process = subprocess.Popen(["logi-devmon.exe"], stdout=subprocess.DEVNULL)
     sys.stdout.flush()
@@ -83,16 +84,12 @@ def mouse_event_listener_thread():
 
     logidevmon.set_specialKey_config(mouseUnitId, 86, True)
     logidevmon.set_specialKey_config(mouseUnitId, 83, True)
+    if logidevmon.set_specialKey_config(mouseUnitId, 202, True):
+        print("Button found!")
     logidevmon.set_wheel_config(mouseUnitId, divert=True, hires=True, invert=False)
     #logidevmon.set_spyConfig(mouseUnitId, spyButtons=False, spyKeys=False, spyPointer=False, spyThumbWheel=False, spyWheel=True)
     logidevmon.read_events(processEvents)
-
-    server_process.kill()
-    server_process.wait(2)
-    Logger.info(f"logidev: logi-devmon.exe exited with returncode {server_process.returncode}")
     Logger.info(f"logidev: Mouse Event Listener Thread Ended")
-
-
 
 def start_mouse_event_listener_thread():
     global mouse_event_listener_thread_handle
@@ -101,3 +98,7 @@ def start_mouse_event_listener_thread():
 
 def stop_mouse_event_listener_thread():
     global mouse_event_listener_thread_handle
+    if server_process is not None:
+        server_process.kill()
+        server_process.wait(2)
+        Logger.info(f"logidev: logi-devmon.exe exited with returncode {server_process.returncode}")
