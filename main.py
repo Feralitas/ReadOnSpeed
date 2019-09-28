@@ -58,11 +58,11 @@ class TDE(Widget):  # Text display engine
         self.i = 0
 
         article = ""
-        for line in fileinput.input(sys.argv[2:]):
+        for line in fileinput.input("dummy_long.txt", openhook=fileinput.hook_encoded("utf-8")):
             article += line #to_unicode
         self.reader = fastReader()
         self.reader.prepareNewText(article)
-        self.reader.setWheelSpeed(1000)
+        self.reader.setWheelSpeed(900)
         self.nextValidCall = 0
 
     def _update_rect(self):

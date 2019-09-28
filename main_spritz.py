@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
+# -*- coding: iso-8859-1 -*-
 
 #PATH=$PATH:/c/Users/Tomixed/AppData/Local/conda/conda/envs/hackzurich
 
@@ -129,7 +130,7 @@ class fastReader(object):
             article = article.replace(char, " <pause> ") #//MW_TODO doppelte pausen raus
 
         article = article.strip()
-        article = article.replace("\n", " <pause> <pause> ")
+        article = article.replace("\n", " <pause> ")
 
         return article.split()
 
@@ -286,12 +287,17 @@ def main():
 
     article = ""
     
-    for line in fileinput.input(sys.argv[2:]):
+    for line in fileinput.input(sys.argv[2:], openhook=fileinput.hook_encoded("utf-8")):
         article += to_unicode(line)
+
 
     reader = fastReader()
     reader.prepareNewText(article)
     reader.setWheelSpeed(wpm)
+
+    for line in reader.textToRead:
+        print(line)
+
 
     for i in range(100):
         (word, durationInSec) = reader.getNextWord()
