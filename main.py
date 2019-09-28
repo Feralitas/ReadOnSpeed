@@ -1,31 +1,100 @@
-import os
-os.environ['KIVY_TEXT'] = 'pil'
-import kivy
-
 from kivy.app import App
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
+from kivy.clock import Clock
+from kivy.graphics import Color, Rectangle, Line
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.image import AsyncImage
+import datetime
+import win32gui
+import win32con
+import win32api
+from kivy.uix.button import Button
+from kivy.uix.widget import Widget
+from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
+from kivy.uix.image import Image
+import random
 
 
-class LoginScreen(GridLayout):
-
+class MyBackground(Widget):
     def __init__(self, **kwargs):
-        super(LoginScreen, self).__init__(**kwargs)
-        self.cols = 2
-        self.add_widget(Label(text='User Name'))
-        self.username = TextInput(multiline=False)
-        self.add_widget(self.username)
-        self.add_widget(Label(text='password'))
-        self.password = TextInput(password=True, multiline=False)
-        self.add_widget(self.password)
+        super(MyBackground, self).__init__(**kwargs)
+        with self.canvas:
+            self.bg = Rectangle(source='water.png', pos=self.pos, size=self.size)
+
+        self.bind(pos=self.update_bg)
+        self.bind(size=self.update_bg)
+
+    def update_bg(self, *args):
+        self.bg.pos = self.pos
+        self.bg.size = self.size
+
+class TDE(Widget):  # Text display engine
+    def __init__(self, **kwargs):
+        super(TDE, self).__init__(**kwargs)
+        with self.canvas:
+            Color(0, 0, 0, 1)  # green; colors range from 0-1 instead of 0-255
+            self.rect = Rectangle(pos=self.pos, size=self.size)
+            self.outTxt = Label(text='Init', markup=True, pos_hint={'center_x':.5, 'center_y':.5})
+            self.bind(size=self._update_rect, pos=self._update_rect)
+        self.i = 0
 
 
-class MyApp(App):
+    def _update_rect(self):
+        self.rect.pos = self.parent.pos
+        self.outTxt.pos = self.parent.pos
+        self.rect.size = self.parent.size
 
+    def callbackWriteText(self, label):
+        self.i=self.i+1
+        self.outTxt.text = '[size=32][color=ff3333]Hello[/color] [color=3333ff]World[/color][/size][size=62]' + str(self.i) + '[/size]'  #datetime.datetime.now()
+
+
+class ReadOnSpeedApp(App):
+
+    def callbackWriteText(self, label):
+        self.i=self.i+1
+        label.text = '[size=32][color=ff3333]Hello[/color] [color=3333ff]World[/color][/size][size=62]' + str(self.i) + '[/size]'  #datetime.datetime.now()
+        self.textGen.callbackWriteText(label)
+    # Set alpha between 0 and 1. 0 no opacity, 1 invisible
+    def makeItTransparent(self, alpha):
+        alpha = int((1-alpha) * 255)
+        handle = win32gui.FindWindow(None, "ReadOnSpeedApp")
+        # Make it a layered window
+        win32gui.SetWindowLong(handle, win32con.GWL_EXSTYLE, win32gui.GetWindowLong(handle, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
+        # make it transparent (alpha between 0 and 255)
+        win32gui.SetLayeredWindowAttributes(handle, win32api.RGB(0, 0, 0), alpha, win32con.LWA_ALPHA)
+        
     def build(self):
-        return LoginScreen()
+        ##Experiment
+        parent = MyBackground()
+        ##Exp End
 
+        self.i = 0
+        label = Label(text='Init', markup=True)
+        self.title = 'ReadOnSpeedApp'
+        
+        # Creating all the necessary timers and so on
+        Clock.schedule_interval(lambda dt: self.callbackWriteText(label), 0.001)
+        Clock.schedule_once(lambda dt: self.makeItTransparent(alpha=0.0), 0.1)
 
-if __name__ == '__main__':
-    MyApp().run()
+        self.textGen = TDE()
+        parent.add_widget(self.textGen)
+
+        # Get the window
+        return parent
+
+ReadOnSpeedApp().run()
+
+exit()
+# hello world text
+l = Label(text='Hello world')
+
+# unicode text; can only display glyphs that are available in the font
+l = Label(text=u'Hello world ' + unichr(2764))
+
+# multiline text
+l = Label(text='Multi\nLine')
+
+# size
+l = Label(text='Hello world', font_size='20sp')
