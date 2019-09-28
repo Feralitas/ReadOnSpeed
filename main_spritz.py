@@ -142,6 +142,23 @@ class fastReader(object):
         factor += round(length / 13)
         return factor
 
+    def getNextTime(self):
+        msPerChar = self.maxMsPerChar - (self.wheelSpeed / 10)
+        word = self.textToRead[self.wordPos]
+        if self.direction > 0:
+            if word == "<pause>":
+                durationInSec = (msPerChar*self.charPerWhitespace)/1000
+            else:
+                durationInSec = (msPerChar*self.word2factor(word))/1000
+        elif self.direction < 0:
+            if word == "<pause>":                
+                durationInSec = (msPerChar*self.charPerWhitespace)/1000
+            else:
+                durationInSec = (msPerChar*self.word2factor(word))/1000
+        else:     
+                durationInSec = 0.05 #(msPerChar*len(word))/1000
+        return (durationInSec)
+
     def getNextWord(self):
         
         msPerChar = self.maxMsPerChar - (self.wheelSpeed / 10)
@@ -180,7 +197,49 @@ class fastReader(object):
                 (highlightPos, prefix_space, postfix_space) = self.calculate_spaces(word, self.max_length)
                 word = (" " * prefix_space) + self.color_orp_char(word, highlightPos) + (" " * postfix_space)
                 
-                durationInSec = 0.05 #(msPerChar*len(word))/1000
+                durationInSec = 0.0 #(msPerChar*len(word))/1000
+        return (word, durationInSec)
+
+    def getNextWordCounting(self):
+        tickfaktor=100
+        word = self.textToRead[self.wordPos]
+        durationInSec = 0
+        self.ticks -=(len(word) * tickfaktor)
+        if(self.ticks > 0):
+            if self.direction > 0:
+                if word == "<pause>":
+                    #(highlightPos, prefix_space, postfix_space) = self.calculate_spaces(self.textToRead[self.wordPos-1], self.max_length)
+                    durationInSec = (msPerChar*self.ticks)/1000
+                    word=""
+                    #word = (" " * prefix_space) + self.color_orp_char(self.textToRead[self.wordPos-1], highlightPos) + (" " * postfix_space)
+                else:
+                    (highlightPos, prefix_space, postfix_space) = self.calculate_spaces(word, self.max_length)
+                    
+                    durationInSec = (msPerChar*self.ticks)/1000
+                    word = (" " * prefix_space) + self.color_orp_char(word, highlightPos) + (" " * postfix_space)                    
+                self.wordPos = self.wordPos + 1
+                if self.wordPos > len(self.textToRead)-1:
+                    self.wordPos = 0
+            elif self.direction < 0:
+                if word == "<pause>":
+                    #(highlightPos, prefix_space, postfix_space) = self.calculate_spaces(self.textToRead[self.wordPos+1], self.max_length)
+                    
+                    durationInSec = (msPerChar*self.ticks)/1000
+                    word =""
+                    #word = (" " * prefix_space) + self.color_orp_char(self.textToRead[self.wordPos+1], highlightPos) + (" " * postfix_space)
+                else:
+                    (highlightPos, prefix_space, postfix_space) = self.calculate_spaces(word, self.max_length)
+                    
+                    durationInSec = (msPerChar*self.ticks)/1000
+                    word = (" " * prefix_space) + self.color_orp_char(word, highlightPos) + (" " * postfix_space)                    
+                self.wordPos = self.wordPos - 1
+                if self.wordPos < 0:
+                    self.wordPos = len(self.textToRead)-1
+            else:                
+                    (highlightPos, prefix_space, postfix_space) = self.calculate_spaces(word, self.max_length)
+                    word = (" " * prefix_space) + self.color_orp_char(word, highlightPos) + (" " * postfix_space)
+                    
+                    durationInSec = 0.0 #(msPerChar*len(word))/1000
         return (word, durationInSec)
 
     def setWheelSpeed(self, speed):
@@ -205,6 +264,7 @@ class fastReader(object):
         self.wheelSpeed = 0
         self.max_length = 0
         self.direction = 1
+        self.ticks = 0
         self. maxMsPerChar = 100
         self.charPerWhitespace = 3
         self.textToRead = self.parse_article(newText)

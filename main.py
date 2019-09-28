@@ -102,6 +102,8 @@ class TDE(Widget):  # Text display engine
             if time_message - self.time_last_scroll_event < 0.3:
                 Logger.info("Scroll: Scrolling stopped")
                 self.reader.setWheelSpeed(0)
+                velocity=0
+                self.reader.ticks=0
                 self.is_scrolling = False
         else:
             if time_message != self.time_last_scroll_event:
@@ -111,8 +113,9 @@ class TDE(Widget):  # Text display engine
         self.time_last_scroll_event = time_message
         if self.is_scrolling:
             self.reader.setWheelSpeed(-1*velocity*1000/30)
+            self.reader.ticks += velocity            
         if self.i % 10 == 1:
-            print(f"i={self.i} velocity={self.reader.wheelSpeed} timediff={self.nextValidCall-self.i}")
+            print(f"i={self.i} ticks={self.reader.ticks} velocity={self.reader.wheelSpeed} timediff={self.nextValidCall-self.i}")
         if self.i > self.nextValidCall:# and self.is_scrolling:
             (word, durationInSec) = self.reader.getNextWord()
             if len(word) > 0:
