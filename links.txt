@@ -1,0 +1,9 @@
+Logitech GitHub:
+https://github.com/Logitech/hackzurich2019
+
+python spritz implementation (cmd):
+https://github.com/littleq0903/spritz-cmd
+
+python gui:
+https://kivy.org/#home
+  conda install kivy -c conda-forge
