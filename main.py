@@ -31,7 +31,7 @@ from main_spritz import fastReader
 import sys
 import fileinput
 
-from mouseInterfaces import start_mouse_event_listener_thread, get_time_and_velocity
+from mouseInterfaces import start_mouse_event_listener_thread, get_time_and_velocity, stop_mouse_event_listener_thread
 
 class MyBackground(Widget):
     def __init__(self, **kwargs):
@@ -161,6 +161,9 @@ class ReadOnSpeedApp(App):
         self.makeItForeground()
         self.StatusOfApp = 1
 
+    def on_stop(self):
+        stop_mouse_event_listener_thread()
+
     def overwatch(self):
         if self.preller == 0:
             if self.StatusOfApp == 0:
@@ -220,5 +223,6 @@ try:
     ReadOnSpeedApp().run()
 except KeyboardInterrupt:
     Logger.info("main: Ctrl+C detected. Terminate!")
+    stop_mouse_event_listener_thread()
 
 exit()
