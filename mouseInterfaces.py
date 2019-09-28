@@ -14,6 +14,11 @@ time_message = time.time_ns()
 velocity = 0
 mouse_event_listener_thread_handle = None
 
+def get_time_and_velocity():
+    global time_message, velocity
+    return (time_message, velocity)
+    
+
 def processEvents(message):
     global time_message, velocity
     #print(f"{message}")
@@ -21,8 +26,8 @@ def processEvents(message):
     if message["path"] == "wheel" and message["success"]:
         time_message = time.time_ns()
         velocity = message['value']['delta'] * 1.0
-        print(f"{message['value']['delta']: 5}, {velocity: 15.4}, {time_message1}", end="")
-        print(f"{message['value']['hires']: 5}, {message['value']['periods']: 5}")
+        #print(f"{message['value']['delta']: 5}, {velocity: 15.4}, {time_message}", end="")
+        #print(f"{message['value']['hires']: 5}, {message['value']['periods']: 5}")
         sys.stdout.flush()
     if message["path"] == "divertedButtons" and message["value"]["cid1"] == 83:
         return False

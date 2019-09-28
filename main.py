@@ -31,7 +31,7 @@ from main_spritz import fastReader
 import sys
 import fileinput
 
-from mouseInterfaces import start_mouse_event_listener_thread, time_message, velocity
+from mouseInterfaces import start_mouse_event_listener_thread, get_time_and_velocity
 
 class MyBackground(Widget):
     def __init__(self, **kwargs):
@@ -74,6 +74,8 @@ class TDE(Widget):  # Text display engine
         self.nextValidCall = 0
         self.time_last_scroll_event = 0
         self.is_scrolling = False
+        self.old_velocities = [0, 0, 0]
+        self.old_velocity_ptr = 0
 
 
     def _update_rect(self):
@@ -89,21 +91,33 @@ class TDE(Widget):  # Text display engine
 
     def callbackWriteText(self, label):
         self.i=self.i+1
+        time_message, velocity = get_time_and_velocity()
+
+        self.old_velocities[self.old_velocity_ptr] = velocity
+        velocity = sum(self.old_velocities) / len(self.old_velocities)
+        self.old_velocity_ptr = (self.old_velocity_ptr + 1) % len(self.old_velocities)
+
+        #print (time_message)
         if self.is_scrolling:
-            if time_message - self.time_last_scroll_event < 0.03:
+            if time_message - self.time_last_scroll_event < 0.3:
                 Logger.info("Scroll: Scrolling stopped")
+                self.reader.setWheelSpeed(0)
                 self.is_scrolling = False
         else:
             if time_message != self.time_last_scroll_event:
                 Logger.info("Scroll: Scrolling started")
                 self.is_scrolling = True
+                self.nextValidCall = self.i-1
         self.time_last_scroll_event = time_message
-
-        if self.i > self.nextValidCall:
+        if self.is_scrolling:
+            self.reader.setWheelSpeed(-1*velocity*1000/30)
+        if self.i % 10 == 1:
+            print(f"i={self.i} velocity={self.reader.wheelSpeed} timediff={self.nextValidCall-self.i}")
+        if self.i > self.nextValidCall:# and self.is_scrolling:
             (word, durationInSec) = self.reader.getNextWord()
             if len(word) > 0:
                 self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+word+'[/font][/color][/size]'  #datetime.datetime.now()
-            self.nextValidCall=self.i+durationInSec*1000
+            self.nextValidCall=self.i+durationInSec*100
         self.setToMiddle()
 
 
@@ -191,7 +205,8 @@ class ReadOnSpeedApp(App):
         self.textGen = TDE()
         parent.add_widget(self.textGen)
 
-        Clock.schedule_interval(lambda dt: self.callbackWriteText(label), 0.001)
+
+        Clock.schedule_interval(lambda dt: self.callbackWriteText(label), 0.01)
         Clock.schedule_once(lambda dt: self.hibernate(), 0.2) # initialiying the hibernate after start up
         Clock.schedule_interval(lambda dt: self.overwatch(), 0.1)  #This loop is always listening for a wake up or suspend.
         Clock.schedule_interval(lambda dt: self.Entprellung(),0.3) #This loop is always listening for a wake up or suspend.
