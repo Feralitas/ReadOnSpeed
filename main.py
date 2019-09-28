@@ -55,7 +55,8 @@ class TDE(Widget):  # Text display engine
             pos_hint = {'center_x': .5, 'center_y': .5}
             self.pos = self.center_x , self.center_y 
             self.rect = Rectangle(pos=self.pos, size=self.size)
-            self.outTxt = Label(text='Init', markup=True, pos_hint={'center_x':.5, 'center_y':.5})
+            self.outTxt = Label(text='Init', markup=True, pos_hint={'center_x': .5, 'center_y': .5})
+            #self.helpLine = Label(text='[size=12][color=000000][font=RobotoMono-Regular]'+'Slow: 3 Fast: 33 Words per Second'+'[/font][/color][/size]', markup=True)
         self.bind(size=self._update_rect, pos=self._update_rect)
         self.i = 0
 
@@ -84,6 +85,7 @@ class TDE(Widget):  # Text display engine
         self.rect.size = self.parent.size
         self.outTxt.pos = self.parent.center_x+80, self.parent.center_y-50
         self.outTxt.pos_hint = {'center_x': .5, 'center_y': .5}
+        #self.helpLine.pos = self.parent.center_x-120, self.parent.center_y-90
 
     def callbackWriteText(self, label):
         self.i=self.i+1
@@ -146,31 +148,38 @@ class ReadOnSpeedApp(App):
         self.StatusOfApp = 1
 
     def overwatch(self):
-        if self.StatusOfApp == 0:
-            wakeUpKey = {
-           0x10: 'shift',
-           0x20: 'space'}
-            for i in range(1, 256):
-                if win32api.GetAsyncKeyState(i):
-                    if i in wakeUpKey:
-                        self.startUp()
-        if self.StatusOfApp == 1:
-            shutDownKey = {
-           0x10: 'shift',
-           0x20: 'space'}
-            for i in range(1, 256):
-                if win32api.GetAsyncKeyState(i):
-                    if i in shutDownKey:
-                        self.hibernate()
-            if self.getHandleOfThisWindow() != win32gui.GetForegroundWindow():
-                self.hibernate()
+        if self.preller == 0:
+            if self.StatusOfApp == 0:
+                wakeUpKey = {
+            0x10: 'shift',
+            0x20: 'space'}
+                for i in range(1, 256):
+                    if win32api.GetAsyncKeyState(i):
+                        if i in wakeUpKey:
+                            self.startUp()
+                            self.preller = 4
+            if self.StatusOfApp == 1:
+                shutDownKey = {
+            0x10: 'shift',
+            0x20: 'space'}
+                for i in range(1, 256):
+                    if win32api.GetAsyncKeyState(i):
+                        if i in shutDownKey:
+                            self.hibernate()
+                            self.preller = 4
+                if self.getHandleOfThisWindow() != win32gui.GetForegroundWindow():
+                    self.hibernate()
 
-
+    def Entprellung(self):
+        if self.preller != 0:
+            self.preller = self.preller - 1
+        
 
     def build(self):
         ##Experiment
         self.handle = 0  #init
         self.StatusOfApp = 0
+        self.preller = 0
         parent = MyBackground()  
         ##Exp End
 
@@ -184,7 +193,8 @@ class ReadOnSpeedApp(App):
 
         Clock.schedule_interval(lambda dt: self.callbackWriteText(label), 0.001)
         Clock.schedule_once(lambda dt: self.hibernate(), 0.2) # initialiying the hibernate after start up
-        Clock.schedule_interval(lambda dt: self.overwatch(),0.1) #This loop is always listening for a wake up or suspend.
+        Clock.schedule_interval(lambda dt: self.overwatch(), 0.1)  #This loop is always listening for a wake up or suspend.
+        Clock.schedule_interval(lambda dt: self.Entprellung(),0.3) #This loop is always listening for a wake up or suspend.
         # Get the window
         return parent
 
