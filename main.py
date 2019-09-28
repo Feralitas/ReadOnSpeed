@@ -113,7 +113,8 @@ class ReadOnSpeedApp(App):
         handle = win32gui.FindWindow(None, "ReadOnSpeedApp")
         shell = win32com.client.Dispatch("WScript.Shell")
         shell.SendKeys('%')
-        win32gui.SetWindowPos(handle,500,500,500,500)
+        flags, hcursor, (x,y) = win32gui.GetCursorInfo()
+        win32gui.SetWindowPos(handle, win32con.HWND_TOP, x-200, y-200, 400, 400, win32con.SWP_SHOWWINDOW)
 
     def build(self):
         ##Experiment
@@ -133,7 +134,7 @@ class ReadOnSpeedApp(App):
         Clock.schedule_interval(lambda dt: self.callbackWriteText(label), 0.001)
         Clock.schedule_once(lambda dt: self.makeItTransparent(alpha=0.0), 0.1)
         Clock.schedule_once(lambda dt: self.textGen.setToMiddle(), 0.2)
-        #Clock.schedule_interval(lambda dt: self.PositionToMouse(),2)
+        Clock.schedule_interval(lambda dt: self.PositionToMouse(),0.5)
         # Get the window
         return parent
 
