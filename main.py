@@ -26,14 +26,15 @@ class ReadOnSpeedApp(App):
     def build(self):
         self.i = 0
         label = Label(text='Init', markup=True)
-        #Clock.schedule_once(lambda dt: self.show_marks(label), 1)
+        self.title = 'ReadOnSpeedApp'
+
         Clock.schedule_interval(lambda dt: self.callbackWriteText(label), 0.001)
-        Clock.schedule_once(lambda dt: self.makeItTransparent(alpha=0.2), 0.1)
+        Clock.schedule_once(lambda dt: self.makeItTransparent(alpha=0.2), 0.5)
         # Get the window
         
         return label
 
-ReadOnSpeed().run()
+ReadOnSpeedApp().run()
 
 exit()
 # hello world text
