@@ -59,12 +59,14 @@ class TDE(Widget):  # Text display engine
         self.bind(size=self._update_rect, pos=self._update_rect)
         self.i = 0
 
-        article = "abcdef dstrgs sgrserg aew4g"
-        #for line in fileinput.input(sys.argv[2:]):
-        #    article += line #to_unicode
+
+        article = ""
+        for line in fileinput.input("dummy_long.txt", openhook=fileinput.hook_encoded("utf-8")):
+            article += line #to_unicode
+
         self.reader = fastReader()
         self.reader.prepareNewText(article)
-        self.reader.setWheelSpeed(1000)
+        self.reader.setWheelSpeed(900)
         self.nextValidCall = 0
         self.time_last_scroll_event = 0
         self.is_scrolling = False
@@ -96,8 +98,6 @@ class TDE(Widget):  # Text display engine
             (word, durationInSec) = self.reader.getNextWord()
             self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+word+'[/font][/color][/size]'  #datetime.datetime.now()
             self.nextValidCall=self.i+durationInSec*1000
-
-        self.outTxt.text = '[size=32][color=ff3333]Hello[/color] [color=3333ff]World[/color][/size][size=62][color=000000]' + str(self.i) + '[/color][/size]'  #datetime.datetime.now()
         self.setToMiddle()
 
 
@@ -127,7 +127,8 @@ class ReadOnSpeedApp(App):
         handle = win32gui.FindWindow(None, "ReadOnSpeedApp")
         shell = win32com.client.Dispatch("WScript.Shell")
         shell.SendKeys('%')
-        win32gui.SetWindowPos(handle,500,500,500,500)
+        flags, hcursor, (x,y) = win32gui.GetCursorInfo()
+        win32gui.SetWindowPos(handle, win32con.HWND_TOP, x-250, y-210, 500, 200, win32con.SWP_SHOWWINDOW)
 
     def build(self):
         ##Experiment
@@ -147,7 +148,7 @@ class ReadOnSpeedApp(App):
         Clock.schedule_interval(lambda dt: self.callbackWriteText(label), 0.001)
         Clock.schedule_once(lambda dt: self.makeItTransparent(alpha=0.0), 0.1)
         Clock.schedule_once(lambda dt: self.textGen.setToMiddle(), 0.2)
-        #Clock.schedule_interval(lambda dt: self.PositionToMouse(),2)
+        Clock.schedule_interval(lambda dt: self.PositionToMouse(),0.1)
         # Get the window
         return parent
 
