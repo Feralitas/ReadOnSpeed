@@ -53,7 +53,7 @@ class TDE(Widget):  # Text display engine
         with self.canvas:
             Color(0, 0, 0, 0)  # green; colors range from 0-1 instead of 0-255
             pos_hint = {'center_x': .5, 'center_y': .5}
-            self.pos = self.center_x - 50, self.center_y - 50
+            self.pos = self.center_x , self.center_y 
             self.rect = Rectangle(pos=self.pos, size=self.size)
             self.outTxt = Label(text='Init', markup=True, pos_hint={'center_x':.5, 'center_y':.5})
         self.bind(size=self._update_rect, pos=self._update_rect)
@@ -82,7 +82,7 @@ class TDE(Widget):  # Text display engine
     
     def setToMiddle(self):
         self.rect.size = self.parent.size
-        self.outTxt.pos = self.parent.center
+        self.outTxt.pos = self.parent.center_x+80, self.parent.center_y-50
         self.outTxt.pos_hint = {'center_x': .5, 'center_y': .5}
 
     def callbackWriteText(self, label):
@@ -131,7 +131,7 @@ class ReadOnSpeedApp(App):
         shell = win32com.client.Dispatch("WScript.Shell")
         shell.SendKeys('%')
         flags, hcursor, (x,y) = win32gui.GetCursorInfo()
-        win32gui.SetWindowPos(self.getHandleOfThisWindow(), win32con.HWND_TOP, x - 250, y - 210, 500, 200, win32con.SWP_SHOWWINDOW)
+        win32gui.SetWindowPos(self.getHandleOfThisWindow(), win32con.HWND_TOP, x - 180, y - 115, 400, 100, win32con.SWP_SHOWWINDOW)
         self.makeItForeground()
     
     def hibernate(self):
@@ -142,9 +142,10 @@ class ReadOnSpeedApp(App):
         win32gui.ShowWindow(self.getHandleOfThisWindow(),1)
         self.PositionToMouse()
         self.makeItTransparent(.2)
+        self.makeItForeground()
         self.StatusOfApp = 1
 
-    def waitForWakeUpCall(self):
+    def overwatch(self):
         if self.StatusOfApp == 0:
             wakeUpKey = {
            0x10: 'shift',
@@ -161,6 +162,8 @@ class ReadOnSpeedApp(App):
                 if win32api.GetAsyncKeyState(i):
                     if i in shutDownKey:
                         self.hibernate()
+            if self.getHandleOfThisWindow() != win32gui.GetForegroundWindow():
+                self.hibernate()
 
 
 
@@ -168,7 +171,7 @@ class ReadOnSpeedApp(App):
         ##Experiment
         self.handle = 0  #init
         self.StatusOfApp = 0
-        parent = MyBackground()
+        parent = MyBackground()  
         ##Exp End
 
         self.i = 0
@@ -176,14 +179,12 @@ class ReadOnSpeedApp(App):
         self.title = 'ReadOnSpeedApp'
         
         # Creating all the necessary timers and so on
-
-
         self.textGen = TDE()
         parent.add_widget(self.textGen)
 
         Clock.schedule_interval(lambda dt: self.callbackWriteText(label), 0.001)
         Clock.schedule_once(lambda dt: self.hibernate(), 0.2) # initialiying the hibernate after start up
-        Clock.schedule_interval(lambda dt: self.waitForWakeUpCall(),0.1) #This loop is always listening for a wake up or suspend.
+        Clock.schedule_interval(lambda dt: self.overwatch(),0.1) #This loop is always listening for a wake up or suspend.
         # Get the window
         return parent
 
