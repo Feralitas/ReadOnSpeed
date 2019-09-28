@@ -52,11 +52,12 @@ class TDE(Widget):  # Text display engine
     def setToMiddle(self):
         self.rect.size = self.parent.size
         self.outTxt.pos = self.parent.center
-        self.outTxt.pos_hint={'center_x':.5, 'center_y':.5}
+        self.outTxt.pos_hint = {'center_x': .5, 'center_y': .5}
 
     def callbackWriteText(self, label):
         self.i=self.i+1
         self.outTxt.text = '[size=32][color=ff3333]Hello[/color] [color=3333ff]World[/color][/size][size=62]' + str(self.i) + '[/size]'  #datetime.datetime.now()
+        self.setToMiddle()
 
 
 
