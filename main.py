@@ -67,7 +67,7 @@ class TDE(Widget):  # Text display engine
     def setToMiddle(self):
         self.rect.size = self.parent.size
         self.outTxt.pos = self.parent.center
-        self.outTxt.pos_hint={'center_x':.5, 'center_y':.5}
+        self.outTxt.pos_hint = {'center_x': .5, 'center_y': .5}
 
     def callbackWriteText(self, label):
         self.i=self.i+1
@@ -75,7 +75,7 @@ class TDE(Widget):  # Text display engine
             (word, durationInSec) = self.reader.getNextWord()
             self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+word+'[/font][/color][/size]'  #datetime.datetime.now()
             self.nextValidCall=self.i+durationInSec*1000
-
+        self.setToMiddle()
 
 
 class ReadOnSpeedApp(App):
