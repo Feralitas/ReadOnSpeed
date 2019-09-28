@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.clock import Clock
@@ -16,6 +19,10 @@ from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
 from kivy.uix.image import Image
 from kivy.uix.anchorlayout import AnchorLayout
 import random
+
+from main_spritz import fastReader
+import sys
+import fileinput
 
 
 class MyBackground(Widget):
@@ -44,6 +51,14 @@ class TDE(Widget):  # Text display engine
         self.bind(size=self._update_rect, pos=self._update_rect)
         self.i = 0
 
+        article = ""
+        for line in fileinput.input(sys.argv[2:]):
+            article += line #to_unicode
+        self.reader = fastReader()
+        self.reader.prepareNewText(article)
+        self.reader.setWheelSpeed(1000)
+        self.nextValidCall = 0
+
     def _update_rect(self):
         self.rect.size = self.parent.size
         self.outTxt.pos = self.parent.center
@@ -56,7 +71,10 @@ class TDE(Widget):  # Text display engine
 
     def callbackWriteText(self, label):
         self.i=self.i+1
-        self.outTxt.text = '[size=32][color=ff3333]Hello[/color] [color=3333ff]World[/color][/size][size=62]' + str(self.i) + '[/size]'  #datetime.datetime.now()
+        if self.i > self.nextValidCall:
+            (word, durationInSec) = self.reader.getNextWord()
+            self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+word+'[/font][/color][/size]'  #datetime.datetime.now()
+            self.nextValidCall=self.i+durationInSec*1000
 
 
 
