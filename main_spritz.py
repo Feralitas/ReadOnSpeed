@@ -132,7 +132,7 @@ class fastReader(object):
             article = article.replace(char, " <pause> ") #//MW_TODO doppelte pausen raus
 
         article = article.strip()
-        article = article.replace("\n", " <pause> ")
+        #article = article.replace("\n", " <pause> ")
 
         return article.split()
 
