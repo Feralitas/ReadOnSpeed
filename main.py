@@ -20,7 +20,7 @@ from kivy.uix.anchorlayout import AnchorLayout
 import random
 from kivy.config import Config
 import win32com.client
-Config.set('graphics', 'fullscreen', 'fake')
+Config.set('graphics', 'borderless', 'true')
 Config.set('graphics', 'position', 'custom')
 Config.set('graphics', 'top', '300')
 Config.set('graphics', 'left', '300')
