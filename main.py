@@ -19,6 +19,12 @@ from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
 from kivy.uix.image import Image
 from kivy.uix.anchorlayout import AnchorLayout
 import random
+from kivy.config import Config
+import win32com.client
+Config.set('graphics', 'fullscreen', 'fake')
+Config.set('graphics', 'position', 'custom')
+Config.set('graphics', 'top', '300')
+Config.set('graphics', 'left', '300')
 
 from main_spritz import fastReader
 import sys
@@ -92,7 +98,13 @@ class ReadOnSpeedApp(App):
         win32gui.SetWindowLong(handle, win32con.GWL_EXSTYLE, win32gui.GetWindowLong(handle, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
         # make it transparent (alpha between 0 and 255)
         win32gui.SetLayeredWindowAttributes(handle, win32api.RGB(0, 0, 0), alpha, win32con.LWA_ALPHA)
-        
+    
+    def makeItForeground(self):
+        handle = win32gui.FindWindow(None, "ReadOnSpeedApp")
+        shell = win32com.client.Dispatch("WScript.Shell")
+        shell.SendKeys('%')
+        win32gui.SetForegroundWindow(handle)
+
     def build(self):
         ##Experiment
         parent = MyBackground()
@@ -111,6 +123,7 @@ class ReadOnSpeedApp(App):
         Clock.schedule_interval(lambda dt: self.callbackWriteText(label), 0.001)
         Clock.schedule_once(lambda dt: self.makeItTransparent(alpha=0.0), 0.1)
         Clock.schedule_once(lambda dt: self.textGen.setToMiddle(), 0.2)
+        # Clock.schedule_interval(lambda dt: self.makeItForeground(),2)
         # Get the window
         return parent
 
