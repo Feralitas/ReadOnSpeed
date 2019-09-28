@@ -105,17 +105,13 @@ class TDE(Widget):  # Text display engine
 class ReadOnSpeedApp(App):
 
     def callbackWriteText(self, label):
-        self.i=self.i+1
-        label.text = '[size=32][color=ff3333]Hello[/color] [color=3333ff]World[/color][/size][size=62]' + str(self.i) + '[/size]'  #datetime.datetime.now()
         self.textGen.callbackWriteText(label)
-    # Set alpha between 0 and 1. 0 no opacity, 1 invisible
-    def makeItTransparent(self, alpha):
+    
+    def makeItTransparent(self, alpha):# Set alpha between 0 and 1. 0 no opacity, 1 invisible
         alpha = int((1-alpha) * 255)
         handle = win32gui.FindWindow(None, "ReadOnSpeedApp")
-        # Make it a layered window
-        win32gui.SetWindowLong(handle, win32con.GWL_EXSTYLE, win32gui.GetWindowLong(handle, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
-        # make it transparent (alpha between 0 and 255)
-        win32gui.SetLayeredWindowAttributes(handle, win32api.RGB(0, 0, 0), alpha, win32con.LWA_ALPHA)
+        win32gui.SetWindowLong(handle, win32con.GWL_EXSTYLE, win32gui.GetWindowLong(handle, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)   # Make it a layered window
+        win32gui.SetLayeredWindowAttributes(handle, win32api.RGB(0, 0, 0), alpha, win32con.LWA_ALPHA)        # make it transparent (alpha between 0 and 255)
     
     def makeItForeground(self):
         handle = win32gui.FindWindow(None, "ReadOnSpeedApp")
@@ -128,7 +124,8 @@ class ReadOnSpeedApp(App):
         shell = win32com.client.Dispatch("WScript.Shell")
         shell.SendKeys('%')
         flags, hcursor, (x,y) = win32gui.GetCursorInfo()
-        win32gui.SetWindowPos(handle, win32con.HWND_TOP, x-250, y-210, 500, 200, win32con.SWP_SHOWWINDOW)
+        win32gui.SetWindowPos(handle, win32con.HWND_TOP, x - 250, y - 210, 500, 200, win32con.SWP_SHOWWINDOW)
+        self.makeItForeground()
 
     def build(self):
         ##Experiment
@@ -160,21 +157,4 @@ try:
 except KeyboardInterrupt:
     Logger.info("main: Ctrl+C detected. Terminate!")
 
-
 exit()
-# hello world text
-l = Label(text='Hello world')
-
-# unicode text; can only display glyphs that are available in the font
-l = Label(text=u'Hello world ' + unichr(2764))
-
-# multiline text
-l = Label(text='Multi\nLine')
-
-# size
-l = Label(text='Hello world', font_size='20sp')
-
-
-
-btn = Button(text='Hello World')
-layout.add_widget(btn)
