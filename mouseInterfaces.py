@@ -18,10 +18,10 @@ def processEvents(message):
     message = json.loads(message)
     if message["path"] == "wheel" and message["success"]:
         time_message1 = time.time_ns()
-        delta_time = time_message2 - time_message1
         time_message2 = time_message1
-        velocity = message['value']['delta'] / delta_time * 1e6
-        print(f"{message['value']['delta']: 5}, {delta_time: 15}, {velocity: 15.4}")
+        velocity = message['value']['delta'] * 1.0
+        print(f"{message['value']['delta']: 5}, {velocity: 15.4}, {time_message1}", end="")
+        print(f"{message['value']['hires']: 5}, {message['value']['periods']: 5}")
         sys.stdout.flush()
     if message["path"] == "divertedButtons" and message["value"]["cid1"] == 83:
         return False
@@ -58,7 +58,8 @@ if not devinfo["isConnected"]:
 
 logidevmon.set_specialKey_config(mouseUnitId, 86, True)
 logidevmon.set_specialKey_config(mouseUnitId, 83, True)
-logidevmon.set_spyConfig(mouseUnitId, spyButtons=False, spyKeys=False, spyPointer=False, spyThumbWheel=False, spyWheel=True)
+logidevmon.set_wheel_config(mouseUnitId, divert=True, hires=True, invert=False)
+#logidevmon.set_spyConfig(mouseUnitId, spyButtons=False, spyKeys=False, spyPointer=False, spyThumbWheel=False, spyWheel=True)
 logidevmon.read_events(processEvents)
 
 server_process.kill()
