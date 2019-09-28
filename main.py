@@ -1,3 +1,7 @@
+import os
+os.environ['KIVY_TEXT'] = 'pil'
+import kivy
+
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
