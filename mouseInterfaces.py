@@ -1,25 +1,68 @@
-import pygame, jason
+#!/usr/bin/env python
 
-pygame.init()
+import logidevmon
+import subprocess
+import time
+import json
+import sys
 
-def getScrollStatus():
-    While true:
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    print ("You pressed the left mouse button.")
+server_process = subprocess.Popen(["logi-devmon.exe"], stdout=subprocess.DEVNULL)
+time.sleep(1)
+print("Server started")
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    quit()
+time_message2 = time.time_ns()
 
-#Get the file name for the new file to write
-filter = "JSON File (*.json)|*.json|All Files (*.*)|*.*||"
-filename = rs.SaveFileName("Save JSON file as", filter)
+def processEvents(message):
+    global time_message2
+    #print(f"{message}")
+    message = json.loads(message)
+    if message["path"] == "wheel" and message["success"]:
+        time_message1 = time.time_ns()
+        delta_time = time_message2 - time_message1
+        time_message2 = time_message1
+        velocity = message['value']['delta'] / delta_time * 1e6
+        print(f"{message['value']['delta']: 5}, {delta_time: 15}, {velocity: 15.4}")
+        sys.stdout.flush()
+    if message["path"] == "divertedButtons" and message["value"]["cid1"] == 83:
+        return False
+    else:
+        return True
 
-# If the file name exists, write a JSON string into the file.
-if filename:
-    # Writing JSON data
-    with open(filename, 'w') as f:
-        json.dump(datastore, f)
+mouseUnitId = 0
+keyboardUnitId = 0
+
+logidevmon.list_devices()
+logtech_devices = logidevmon.LOGITECH_DEVICES
+if not isinstance(logtech_devices, list):
+    logtech_devices = [logtech_devices]
+print(logtech_devices)
+
+for device in logtech_devices:
+    if (device["type"] == "keyboard"):
+        keyboardUnitId = device['unitId']
+
+    if (device["type"] == "mouse"):
+        mouseUnitId = device['unitId']
+
+if mouseUnitId == 0:
+    print("No mouse device found.")
+    exit()
+
+print("Get Device info")
+devinfo = logidevmon.get_device_info(mouseUnitId)
+print(devinfo)
+
+if not devinfo["isConnected"]:
+    print("Mouse is not connected")
+    exit()
+
+logidevmon.set_specialKey_config(mouseUnitId, 86, True)
+logidevmon.set_specialKey_config(mouseUnitId, 83, True)
+logidevmon.set_spyConfig(mouseUnitId, spyButtons=False, spyKeys=False, spyPointer=False, spyThumbWheel=False, spyWheel=True)
+logidevmon.read_events(processEvents)
+
+server_process.kill()
+server_process.wait(2)
+print(server_process.returncode)
+
+print("End")
