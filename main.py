@@ -7,6 +7,7 @@ from kivy.graphics import Color, Rectangle, Line
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import AsyncImage
+from kivy.logger import Logger
 import datetime
 import win32gui
 import win32con
@@ -29,6 +30,8 @@ Config.set('graphics', 'left', '300')
 from main_spritz import fastReader
 import sys
 import fileinput
+
+from mouseInterfaces import start_mouse_event_listener_thread, time_message, velocity
 
 class MyBackground(Widget):
     def __init__(self, **kwargs):
@@ -63,6 +66,8 @@ class TDE(Widget):  # Text display engine
         self.reader.prepareNewText(article)
         self.reader.setWheelSpeed(1000)
         self.nextValidCall = 0
+        self.time_last_scroll_event = 0
+        self.is_scrolling = False
 
 
     def _update_rect(self):
@@ -77,6 +82,15 @@ class TDE(Widget):  # Text display engine
 
     def callbackWriteText(self, label):
         self.i=self.i+1
+        if self.is_scrolling:
+            if time_message - self.time_last_scroll_event < 0.03:
+                Logger.info("Scroll: Scrolling stopped")
+                self.is_scrolling = False
+        else:
+            if time_message != self.time_last_scroll_event:
+                Logger.info("Scroll: Scrolling started")
+                self.is_scrolling = True
+        self.time_last_scroll_event = time_message
 
         if self.i > self.nextValidCall:
             (word, durationInSec) = self.reader.getNextWord()
@@ -137,7 +151,14 @@ class ReadOnSpeedApp(App):
         # Get the window
         return parent
 
-ReadOnSpeedApp().run()
+
+start_mouse_event_listener_thread()
+
+try:
+    ReadOnSpeedApp().run()
+except KeyboardInterrupt:
+    Logger.info("main: Ctrl+C detected. Terminate!")
+
 
 exit()
 # hello world text

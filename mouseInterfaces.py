@@ -6,10 +6,13 @@ import time
 import json
 import sys
 import threading
+import asyncio
+from kivy.logger import Logger
 
 
 time_message = time.time_ns()
 velocity = 0
+mouse_event_listener_thread_handle = None
 
 def processEvents(message):
     global time_message, velocity
@@ -28,23 +31,30 @@ def processEvents(message):
 
 
 
-def mouse_event_listener_thread():
+def init_event_loop():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
+def mouse_event_listener_thread():
+    Logger.info("logidev: starting logi-devmon.exe")
     server_process = subprocess.Popen(["logi-devmon.exe"], stdout=subprocess.DEVNULL)
-    print("logi-devmon.exe", end="")
     sys.stdout.flush()
     time.sleep(1)
-    print(" started")
+    Logger.info("logidev: logi-devmon.exe started")
     sys.stdout.flush()
+
+    init_event_loop()
+    Logger.info("logidev: Event loop initiated")
 
     mouseUnitId = 0
     keyboardUnitId = 0
 
     logidevmon.list_devices()
+    Logger.info("logidev: Devices listed")
     logtech_devices = logidevmon.LOGITECH_DEVICES
     if not isinstance(logtech_devices, list):
         logtech_devices = [logtech_devices]
-    print(logtech_devices)
+    Logger.info(f"logidev: Devices: {logtech_devices}")
 
     for device in logtech_devices:
         if (device["type"] == "keyboard"):
@@ -54,16 +64,16 @@ def mouse_event_listener_thread():
             mouseUnitId = device['unitId']
 
     if mouseUnitId == 0:
-        print("No mouse device found.")
+        Logger.error("logidev: No mouse device found.")
         exit()
 
-    print("Get Device info")
+    Logger.info("logidev: Get Device info")
     devinfo = logidevmon.get_device_info(mouseUnitId)
-    print(devinfo)
+    Logger.info(f"logidev: {devinfo}")
     sys.stdout.flush()
 
     if not devinfo["isConnected"]:
-        print("Mouse is not connected")
+        Logger.error("logidev: Mouse is not connected.")
         exit()
 
     logidevmon.set_specialKey_config(mouseUnitId, 86, True)
@@ -74,11 +84,15 @@ def mouse_event_listener_thread():
 
     server_process.kill()
     server_process.wait(2)
-    print(server_process.returncode)
+    Logger.info(f"logidev: logi-devmon.exe exited with returncode {server_process.returncode}")
+    Logger.info(f"logidev: Mouse Event Listener Thread Ended")
 
-    print("Mouse Event Listener Thread Ended")
 
 
 def start_mouse_event_listener_thread():
-    t = threading.Thread(target=mouse_event_listener_thread) 
+    global mouse_event_listener_thread_handle
+    mouse_event_listener_thread_handle = threading.Thread(target=mouse_event_listener_thread, name="MouseListenerThread")
+    mouse_event_listener_thread_handle.start()
 
+def stop_mouse_event_listener_thread():
+    global mouse_event_listener_thread_handle
