@@ -84,8 +84,6 @@ class TDE(Widget):  # Text display engine
             (word, durationInSec) = self.reader.getNextWord()
             self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+word+'[/font][/color][/size]'  #datetime.datetime.now()
             self.nextValidCall=self.i+durationInSec*1000
-
-        self.outTxt.text = '[size=32][color=ff3333]Hello[/color] [color=3333ff]World[/color][/size][size=62][color=000000]' + str(self.i) + '[/color][/size]'  #datetime.datetime.now()
         self.setToMiddle()
 
 
