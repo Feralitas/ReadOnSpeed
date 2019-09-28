@@ -66,7 +66,10 @@ class TDE(Widget):  # Text display engine
 
         self.reader = fastReader()
         self.reader.prepareNewText(article)
-        self.reader.setWheelSpeed(900)
+        if len(sys.argv) > 1:
+            self.reader.setWheelSpeed(int(sys.argv[1]))
+        else:
+            self.reader.setWheelSpeed(300)
         self.nextValidCall = 0
         self.time_last_scroll_event = 0
         self.is_scrolling = False
@@ -96,7 +99,8 @@ class TDE(Widget):  # Text display engine
 
         if self.i > self.nextValidCall:
             (word, durationInSec) = self.reader.getNextWord()
-            self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+word+'[/font][/color][/size]'  #datetime.datetime.now()
+            if len(word) > 0:
+                self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+word+'[/font][/color][/size]'  #datetime.datetime.now()
             self.nextValidCall=self.i+durationInSec*1000
         self.setToMiddle()
 

@@ -61,6 +61,8 @@ class fastReader(object):
         prefix_space = (max_orp - orp)
         postfix_space = (max_length - len(word) - prefix_space)
         
+        if orp != 0:
+            orp -= 1
         return (orp, prefix_space, postfix_space)
 
     def find_max(self, reading):
@@ -124,7 +126,7 @@ class fastReader(object):
         :returns: words in ``article``
         :rytpe: ``list``
         """
-        remove = (',', '.', '!', '?', '-', ';')
+        remove = (',', '.', '!', '?', '-', ';', '-', '(', ')')
 
         for char in remove:
             article = article.replace(char, " <pause> ") #//MW_TODO doppelte pausen raus
@@ -134,6 +136,12 @@ class fastReader(object):
 
         return article.split()
 
+    def word2factor(self, word):
+        length=len(word)
+        factor = 1
+        factor += round(length / 13)
+        return factor
+
     def getNextWord(self):
         
         msPerChar = self.maxMsPerChar - (self.wheelSpeed / 10)
@@ -141,27 +149,29 @@ class fastReader(object):
         word = self.textToRead[self.wordPos]
         if self.direction > 0:
             if word == "<pause>":
-                (highlightPos, prefix_space, postfix_space) = self.calculate_spaces(self.textToRead[self.wordPos-1], self.max_length)
+                #(highlightPos, prefix_space, postfix_space) = self.calculate_spaces(self.textToRead[self.wordPos-1], self.max_length)
                 durationInSec = (msPerChar*self.charPerWhitespace)/1000
-                word = (" " * prefix_space) + self.color_orp_char(self.textToRead[self.wordPos-1], highlightPos) + (" " * postfix_space)
+                word=""
+                #word = (" " * prefix_space) + self.color_orp_char(self.textToRead[self.wordPos-1], highlightPos) + (" " * postfix_space)
             else:
                 (highlightPos, prefix_space, postfix_space) = self.calculate_spaces(word, self.max_length)
                 
-                durationInSec = (msPerChar*len(word))/1000
+                durationInSec = (msPerChar*self.word2factor(word))/1000
                 word = (" " * prefix_space) + self.color_orp_char(word, highlightPos) + (" " * postfix_space)                    
             self.wordPos = self.wordPos + 1
             if self.wordPos > len(self.textToRead)-1:
                 self.wordPos = 0
         elif self.direction < 0:
             if word == "<pause>":
-                (highlightPos, prefix_space, postfix_space) = self.calculate_spaces(self.textToRead[self.wordPos+1], self.max_length)
+                #(highlightPos, prefix_space, postfix_space) = self.calculate_spaces(self.textToRead[self.wordPos+1], self.max_length)
                 
                 durationInSec = (msPerChar*self.charPerWhitespace)/1000
-                word = (" " * prefix_space) + self.color_orp_char(self.textToRead[self.wordPos+1], highlightPos) + (" " * postfix_space)
+                word =""
+                #word = (" " * prefix_space) + self.color_orp_char(self.textToRead[self.wordPos+1], highlightPos) + (" " * postfix_space)
             else:
                 (highlightPos, prefix_space, postfix_space) = self.calculate_spaces(word, self.max_length)
                 
-                durationInSec = (msPerChar*len(word))/1000
+                durationInSec = (msPerChar*self.word2factor(word))/1000
                 word = (" " * prefix_space) + self.color_orp_char(word, highlightPos) + (" " * postfix_space)                    
             self.wordPos = self.wordPos - 1
             if self.wordPos < 0:
