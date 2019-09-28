@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.clock import Clock
@@ -23,6 +25,10 @@ Config.set('graphics', 'position', 'custom')
 Config.set('graphics', 'top', '300')
 Config.set('graphics', 'left', '300')
 
+
+from main_spritz import fastReader
+import sys
+import fileinput
 
 class MyBackground(Widget):
     def __init__(self, **kwargs):
@@ -50,6 +56,15 @@ class TDE(Widget):  # Text display engine
         self.bind(size=self._update_rect, pos=self._update_rect)
         self.i = 0
 
+        article = "abcdef dstrgs sgrserg aew4g"
+        #for line in fileinput.input(sys.argv[2:]):
+        #    article += line #to_unicode
+        self.reader = fastReader()
+        self.reader.prepareNewText(article)
+        self.reader.setWheelSpeed(1000)
+        self.nextValidCall = 0
+
+
     def _update_rect(self):
         self.rect.size = self.parent.size
         self.outTxt.pos = self.parent.center
@@ -62,6 +77,12 @@ class TDE(Widget):  # Text display engine
 
     def callbackWriteText(self, label):
         self.i=self.i+1
+
+        if self.i > self.nextValidCall:
+            (word, durationInSec) = self.reader.getNextWord()
+            self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+word+'[/font][/color][/size]'  #datetime.datetime.now()
+            self.nextValidCall=self.i+durationInSec*1000
+
         self.outTxt.text = '[size=32][color=ff3333]Hello[/color] [color=3333ff]World[/color][/size][size=62][color=000000]' + str(self.i) + '[/color][/size]'  #datetime.datetime.now()
         self.setToMiddle()
 
