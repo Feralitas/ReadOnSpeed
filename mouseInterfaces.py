@@ -7,12 +7,14 @@ import json
 import sys
 import threading
 import asyncio
+import queue
 from kivy.logger import Logger
 
 time_message = time.time_ns()
 velocity = 0
 mouse_event_listener_thread_handle = None
 server_process = None
+command_queue = queue.Queue()
 
 def get_time_and_velocity():
     global time_message, velocity
@@ -29,7 +31,11 @@ def processEvents(message):
         #print(f"{message['value']['delta']: 5}, {velocity: 15.4}, {time_message}", end="")
         #print(f"{message['value']['hires']: 5}, {message['value']['periods']: 5}")
         sys.stdout.flush()
+    if message["path"] == "divertedButtons" and message["value"]["cid1"] == 195:
+        print("Gesture button pushed")
+        command_queue.put("Gesture button")
     if message["path"] == "divertedButtons" and message["value"]["cid1"] == 83:
+        command_queue.put("Program end")
         return False
     else:
         return True
@@ -84,16 +90,15 @@ def mouse_event_listener_thread():
 
     logidevmon.set_specialKey_config(mouseUnitId, 86, True)
     logidevmon.set_specialKey_config(mouseUnitId, 83, True)
-    if logidevmon.set_specialKey_config(mouseUnitId, 202, True):
-        print("Button found!")
+    logidevmon.set_specialKey_config(mouseUnitId, 195, True)
     logidevmon.set_wheel_config(mouseUnitId, divert=True, hires=True, invert=False)
-    #logidevmon.set_spyConfig(mouseUnitId, spyButtons=False, spyKeys=False, spyPointer=False, spyThumbWheel=False, spyWheel=True)
+    #logidevmon.set_spyConfig(mouseUnitId, spyButtons=True, spyKeys=False, spyPointer=False, spyThumbWheel=False, spyWheel=True)
     logidevmon.read_events(processEvents)
     Logger.info(f"logidev: Mouse Event Listener Thread Ended")
 
 def start_mouse_event_listener_thread():
     global mouse_event_listener_thread_handle
-    mouse_event_listener_thread_handle = threading.Thread(target=mouse_event_listener_thread, name="MouseListenerThread")
+    mouse_event_listener_thread_handle = threading.Thread(target=mouse_event_listener_thread, name="MouseListenerThread", daemon=True)
     mouse_event_listener_thread_handle.start()
 
 def stop_mouse_event_listener_thread():

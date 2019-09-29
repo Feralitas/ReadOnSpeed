@@ -31,15 +31,15 @@ Config.set('graphics', 'left', '300')
 from main_spritz import fastReader
 import sys
 import fileinput
-
-from mouseInterfaces import start_mouse_event_listener_thread, get_time_and_velocity, stop_mouse_event_listener_thread
+import queue
+from mouseInterfaces import start_mouse_event_listener_thread, get_time_and_velocity, stop_mouse_event_listener_thread, command_queue
 from markedtext import get_selected_text
 
 class MyBackground(Widget):
     def __init__(self, **kwargs):
         super(MyBackground, self).__init__(**kwargs)
         with self.canvas:
-            self.bg = Rectangle(source='water.png', pos=self.pos, size=self.size)
+            self.bg = Rectangle(source='logi.png', pos=self.pos, size=self.size)
 
         self.bind(pos=self.update_bg)
         self.bind(size=self.update_bg)
@@ -86,7 +86,7 @@ class TDE(Widget):  # Text display engine
     
     def setToMiddle(self):
         self.rect.size = self.parent.size
-        self.outTxt.pos = self.parent.center_x+80, self.parent.center_y-50
+        self.outTxt.pos = self.parent.center_x-60, self.parent.center_y-50
         self.outTxt.pos_hint = {'center_x': .5, 'center_y': .5}
         #self.helpLine.pos = self.parent.center_x-120, self.parent.center_y-90
 
@@ -118,7 +118,7 @@ class TDE(Widget):  # Text display engine
         if self.i > self.nextValidCall:# and self.is_scrolling:
             (word, durationInSec) = self.reader.getNextWord()
             if len(word) > 0:
-                self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+ word +'[/font][/color][/size]'  #datetime.datetime.now()
+                self.outTxt.text = '[size=32][color=FFFFFF][font=RobotoMono-Regular]'+ word +'[/font][/color][/size]'  #datetime.datetime.now()
             self.nextValidCall=self.i+durationInSec*100
         self.setToMiddle()
 
@@ -127,9 +127,17 @@ class TDE(Widget):  # Text display engine
 class ReadOnSpeedApp(App):
 
     def callbackWriteText(self, label):
+        try:
+            cmd = command_queue.get_nowait()
+            if cmd == "Gesture button":
+                self.startUp()
+            if cmd == "Program end":
+                self.stop()
+        except queue.Empty:
+            pass
         if self.StatusOfApp == 1:
             self.textGen.callbackWriteText(label)
-    
+
     def getHandleOfThisWindow(self):
         if self.handle == 0:
             self.handle = win32gui.FindWindow(None, "ReadOnSpeedApp")
