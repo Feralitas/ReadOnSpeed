@@ -12,6 +12,7 @@ import datetime
 import win32gui
 import win32con
 import win32api
+import kivy.utils
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
@@ -32,6 +33,7 @@ import sys
 import fileinput
 
 from mouseInterfaces import start_mouse_event_listener_thread, get_time_and_velocity, stop_mouse_event_listener_thread
+from markedtext import get_selected_text
 
 class MyBackground(Widget):
     def __init__(self, **kwargs):
@@ -60,10 +62,9 @@ class TDE(Widget):  # Text display engine
         self.bind(size=self._update_rect, pos=self._update_rect)
         self.i = 0
 
-
-        article = ""
-        for line in fileinput.input("dummy_long.txt", openhook=fileinput.hook_encoded("utf-8")):
-            article += line #to_unicode
+        article = "Test words"
+        #for line in fileinput.input("dummy_long.txt", openhook=fileinput.hook_encoded("utf-8")):
+        #   article += line #to_unicode
 
         self.reader = fastReader()
         self.reader.prepareNewText(article)
@@ -112,11 +113,12 @@ class TDE(Widget):  # Text display engine
         if self.is_scrolling:
             self.reader.setWheelSpeed(-1*velocity*1000/30)
         if self.i % 10 == 1:
-            print(f"i={self.i} velocity={self.reader.wheelSpeed} timediff={self.nextValidCall-self.i}")
+            #print(f"i={self.i} velocity={self.reader.wheelSpeed} timediff={self.nextValidCall-self.i}")
+            pass
         if self.i > self.nextValidCall:# and self.is_scrolling:
             (word, durationInSec) = self.reader.getNextWord()
             if len(word) > 0:
-                self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+word+'[/font][/color][/size]'  #datetime.datetime.now()
+                self.outTxt.text = '[size=32][color=000000][font=RobotoMono-Regular]'+ word +'[/font][/color][/size]'  #datetime.datetime.now()
             self.nextValidCall=self.i+durationInSec*100
         self.setToMiddle()
 
@@ -149,15 +151,17 @@ class ReadOnSpeedApp(App):
         flags, hcursor, (x,y) = win32gui.GetCursorInfo()
         win32gui.SetWindowPos(self.getHandleOfThisWindow(), win32con.HWND_TOP, x - 180, y - 115, 400, 100, win32con.SWP_SHOWWINDOW)
         self.makeItForeground()
-    
+
     def hibernate(self):
         win32gui.ShowWindow(self.getHandleOfThisWindow(), 0)
         self.StatusOfApp = 0
 
     def startUp(self):
+        self.textGen.reader.prepareNewText(get_selected_text())
         win32gui.ShowWindow(self.getHandleOfThisWindow(),1)
         self.PositionToMouse()
         self.makeItTransparent(.2)
+        self.makeItForeground()
         self.makeItForeground()
         self.StatusOfApp = 1
 

@@ -10,6 +10,7 @@ import sys
 import time
 import math
 import fileinput
+from kivy.utils import escape_markup
 
 def to_unicode(text, encoding='utf-8'):
     """Convert ``text`` to unicode using ``encoding``.
@@ -92,10 +93,9 @@ class fastReader(object):
         """
         color_red = '[color=ff3333]'
         color_restore = '[/color]'
-        chars = list(word)
-        chars.insert(orp, color_red)
-        chars.insert((orp + 2), color_restore)
-        return ''.join(chars)
+        return escape_markup(word[0:orp]) \
+               + color_red + escape_markup(word[orp:orp+1]) \
+               + color_restore + escape_markup(word[orp+1:])
 
     def print_word(self, word, orp_config):
         """Pretty print ``word`` with spritz color formatting
