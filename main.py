@@ -43,7 +43,7 @@ class MyBackground(Widget):
 
         self.bind(pos=self.update_bg)
         self.bind(size=self.update_bg)
-        self.layout = AnchorLayout(anchor_x='center', anchor_y='center')
+        self.layout = AnchorLayout(anchor_x='left', anchor_y='center')
 
     def update_bg(self, *args):
         self.bg.pos = self.pos
@@ -54,10 +54,10 @@ class TDE(Widget):  # Text display engine
         super(TDE, self).__init__(**kwargs)
         with self.canvas:
             Color(0, 0, 0, 0)  # green; colors range from 0-1 instead of 0-255
-            pos_hint = {'center_x': .5, 'center_y': .5}
+            pos_hint = {'left': .5, 'center_y': .5}
             self.pos = self.center_x , self.center_y 
             self.rect = Rectangle(pos=self.pos, size=self.size)
-            self.outTxt = Label(text='Init', markup=True, pos_hint={'center_x': .5, 'center_y': .5})
+            self.outTxt = Label(text='Init', markup=True, pos_hint={'left': .5, 'center_y': .5}, halign='left')
             #self.helpLine = Label(text='[size=12][color=000000][font=RobotoMono-Regular]'+'Slow: 3 Fast: 33 Words per Second'+'[/font][/color][/size]', markup=True)
         self.bind(size=self._update_rect, pos=self._update_rect)
         self.i = 0
@@ -82,12 +82,12 @@ class TDE(Widget):  # Text display engine
     def _update_rect(self):
         self.rect.size = self.parent.size
         self.outTxt.pos = self.parent.center
-        self.outTxt.pos_hint={'center_x':.5, 'center_y':.5}
+        self.outTxt.pos_hint={'left':.5, 'center_y':.5}
     
     def setToMiddle(self):
         self.rect.size = self.parent.size
-        self.outTxt.pos = self.parent.center_x-60, self.parent.center_y-50
-        self.outTxt.pos_hint = {'center_x': .5, 'center_y': .5}
+        self.outTxt.pos = 80, self.parent.center_y-50
+        self.outTxt.pos_hint = {'centlefter_x': .5, 'center_y': .5}
         #self.helpLine.pos = self.parent.center_x-120, self.parent.center_y-90
 
     def callbackWriteText(self, label):
@@ -163,7 +163,7 @@ class ReadOnSpeedApp(App):
         shell = win32com.client.Dispatch("WScript.Shell")
         shell.SendKeys('%')
         flags, hcursor, (x,y) = win32gui.GetCursorInfo()
-        win32gui.SetWindowPos(self.getHandleOfThisWindow(), win32con.HWND_TOP, x - 180, y - 115, 400, 100, win32con.SWP_SHOWWINDOW)
+        win32gui.SetWindowPos(self.getHandleOfThisWindow(), win32con.HWND_TOP, x - 180, y - 115, 600, 100, win32con.SWP_SHOWWINDOW)
         self.makeItForeground()
 
     def hibernate(self):
