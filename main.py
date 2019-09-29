@@ -86,7 +86,7 @@ class TDE(Widget):  # Text display engine
     
     def setToMiddle(self):
         self.rect.size = self.parent.size
-        self.outTxt.pos = 80, self.parent.center_y-50
+        self.outTxt.pos = 150, self.parent.center_y-50
         self.outTxt.pos_hint = {'centlefter_x': .5, 'center_y': .5}
         #self.helpLine.pos = self.parent.center_x-120, self.parent.center_y-90
 
