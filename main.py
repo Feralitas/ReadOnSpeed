@@ -108,13 +108,19 @@ class TDE(Widget):  # Text display engine
             if time_message != self.time_last_scroll_event:
                 Logger.info("Scroll: Scrolling started")
                 self.is_scrolling = True
-                self.nextValidCall = self.i-1
         self.time_last_scroll_event = time_message
         if self.is_scrolling:
-            self.reader.setWheelSpeed(-1*velocity*1000/30)
+            if(velocity > 20):
+                self.reader.setWheelSpeed(-700)
+            elif velocity > 0:
+                self.reader.setWheelSpeed(-100)
+            elif velocity > -20:
+                self.reader.setWheelSpeed(100)
+            else:
+                self.reader.setWheelSpeed(700)
+
         if self.i % 10 == 1:
-            #print(f"i={self.i} velocity={self.reader.wheelSpeed} timediff={self.nextValidCall-self.i}")
-            pass
+            print(f"velocity={velocity} wheelspeed={self.reader.wheelSpeed} timediff={self.nextValidCall-self.i}")
         if self.i > self.nextValidCall:# and self.is_scrolling:
             (word, durationInSec) = self.reader.getNextWord()
             if len(word) > 0:
