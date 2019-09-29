@@ -177,6 +177,9 @@ class fastReader(object):
             if self.wordPos < 0:
                 self.wordPos = len(self.textToRead)-1
         else:                
+            if word == "<pause>":                
+                word = ""
+            else:
                 (highlightPos, prefix_space, postfix_space) = self.calculate_spaces(word, self.max_length)
                 word = (" " * prefix_space) + self.color_orp_char(word, highlightPos) + (" " * postfix_space)
                 

@@ -1,4 +1,5 @@
 
+
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__)))
@@ -45,7 +46,7 @@ def get_selected_text() -> str:
     selected_text = GetClipboardData(CF_TEXT)
     SetClipboardData(CF_TEXT, old_clipboard_text)
     CloseClipboard()
-    selected_text_unicode = selected_text.decode("utf-8", "replace")
+    selected_text_unicode = selected_text.decode("iso-8859-1", "replace")
     #Logger.info(f"Clip New: {selected_text_unicode[0:20]}")
 
     return selected_text_unicode
