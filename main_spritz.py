@@ -160,7 +160,7 @@ class fastReader(object):
                 word = (" " * prefix_space) + self.color_orp_char(word, highlightPos) + (" " * postfix_space)                    
             self.wordPos = self.wordPos + 1
             if self.wordPos > len(self.textToRead)-1:
-                self.wordPos = 0
+                self.wordPos = len(self.textToRead)-1
         elif self.direction < 0:
             if word == "<pause>":
                 #(highlightPos, prefix_space, postfix_space) = self.calculate_spaces(self.textToRead[self.wordPos+1], self.max_length)
@@ -175,7 +175,7 @@ class fastReader(object):
                 word = (" " * prefix_space) + self.color_orp_char(word, highlightPos) + (" " * postfix_space)                    
             self.wordPos = self.wordPos - 1
             if self.wordPos < 0:
-                self.wordPos = len(self.textToRead)-1
+                self.wordPos = 0
         else:                
             if word == "<pause>":                
                 word = ""
@@ -183,7 +183,7 @@ class fastReader(object):
                 (highlightPos, prefix_space, postfix_space) = self.calculate_spaces(word, self.max_length)
                 word = (" " * prefix_space) + self.color_orp_char(word, highlightPos) + (" " * postfix_space)
                 
-                durationInSec = 0.05 #(msPerChar*len(word))/1000
+            durationInSec = 0.05 #(msPerChar*len(word))/1000
         return (word, durationInSec)
 
     def setWheelSpeed(self, speed):
